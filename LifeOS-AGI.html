@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LifeOS AGI — Life Intelligence Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#eef6ff;--surf:#fff;--surf2:#f0f7ff;
+  --bdr:rgba(100,170,255,0.18);--bdr2:rgba(100,170,255,0.35);
+  --b1:#2563eb;--b2:#0ea5e9;--b3:#38bdf8;--b5:#bae6fd;
+  --txt:#0f2a4a;--txt2:#1e4070;--mu:#6b8ab0;--mu2:#94afc8;
+  --grn:#059669;--red:#dc2626;
+  --sh:0 4px 24px rgba(37,99,235,.09);--sh2:0 8px 40px rgba(37,99,235,.17);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* WAVES */
+.wave-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.wave-bg svg{position:absolute;width:100%}
+.w1{top:-8%;opacity:.30;animation:wd 18s ease-in-out infinite}
+.w2{bottom:-8%;opacity:.24;animation:wd 23s ease-in-out infinite reverse}
+.w3{top:38%;opacity:.14;animation:wd 14s ease-in-out infinite 5s}
+@keyframes wd{0%,100%{transform:translateX(0)}50%{transform:translateX(-30px)}}
+#app{position:relative;z-index:1;min-height:100vh}
+
+/* ── PHASE 1 SEARCH ── */
+#p-search{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 16px;text-align:center}
+.brand{font-size:clamp(48px,9vw,90px);font-weight:800;letter-spacing:-3px;line-height:1;background:linear-gradient(135deg,var(--b1),var(--b2),var(--b3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 20px rgba(37,99,235,.2));animation:bIn .9s both}
+.brand-sub{font-size:clamp(9px,1.8vw,12px);letter-spacing:5px;text-transform:uppercase;color:var(--mu);font-family:'JetBrains Mono',monospace;margin-top:8px;margin-bottom:32px;animation:fU .7s .4s both}
+@keyframes bIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fU{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* Language Modal Trigger */
+.lang-trigger{display:inline-flex;align-items:center;gap:8px;padding:9px 20px;border-radius:100px;border:1.5px solid var(--bdr2);background:var(--surf);cursor:pointer;font-size:13px;font-weight:700;color:var(--b1);box-shadow:var(--sh);transition:all .2s;margin-bottom:24px;animation:fU .7s .5s both}
+.lang-trigger:hover{box-shadow:var(--sh2);border-color:var(--b1);transform:translateY(-2px)}
+.lang-trigger span{font-size:18px}
+
+/* Language Modal */
+.lang-modal-bg{position:fixed;inset:0;background:rgba(15,42,74,.3);backdrop-filter:blur(6px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.lang-modal-bg.open{display:flex}
+.lang-modal{background:var(--surf);border-radius:28px;padding:28px 24px;max-width:680px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 24px 80px rgba(37,99,235,.25);animation:mIn .3s both}
+@keyframes mIn{from{opacity:0;transform:scale(.95) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.lang-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.lang-modal-title{font-size:18px;font-weight:800;color:var(--txt)}
+.lang-close{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--bdr);background:var(--surf2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--mu);transition:all .2s}
+.lang-close:hover{border-color:var(--b1);color:var(--b1)}
+.lang-search-inp{width:100%;background:var(--surf2);border:1.5px solid var(--bdr);border-radius:12px;padding:10px 16px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--txt);outline:none;margin-bottom:16px;transition:border-color .2s}
+.lang-search-inp:focus{border-color:rgba(37,99,235,.4)}
+.lang-search-inp::placeholder{color:var(--mu2)}
+.lang-region{margin-bottom:18px}
+.lang-region-lbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--mu2);margin-bottom:10px}
+.lang-list{display:flex;flex-wrap:wrap;gap:7px}
+.lang-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:100px;border:1.5px solid var(--bdr);background:var(--surf);cursor:pointer;font-size:12px;font-weight:600;color:var(--mu);font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s;white-space:nowrap}
+.lang-btn:hover{border-color:var(--b2);color:var(--b1);background:var(--surf2);transform:translateY(-1px)}
+.lang-btn.act{border-color:var(--b1);color:#fff;background:linear-gradient(135deg,var(--b1),var(--b2));box-shadow:0 4px 14px rgba(37,99,235,.3)}
+.lang-btn .lf{font-size:16px}
+
+/* Search box */
+.s-wrap{width:100%;max-width:800px;background:var(--surf);border:1.5px solid var(--bdr2);border-radius:24px;padding:6px 6px 6px 24px;display:flex;align-items:flex-end;gap:10px;box-shadow:var(--sh2),0 0 0 5px rgba(37,99,235,.05);animation:fU .7s .7s both;transition:border-color .3s,box-shadow .3s}
+.s-wrap:focus-within{border-color:rgba(37,99,235,.5);box-shadow:var(--sh2),0 0 0 5px rgba(37,99,235,.10)}
+#mIn{flex:1;background:transparent;border:none;outline:none;color:var(--txt);font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;line-height:1.65;padding:14px 0;min-height:56px;resize:none}
+#mIn::placeholder{color:var(--mu2)}
+#sBtn{flex-shrink:0;background:linear-gradient(135deg,var(--b1),var(--b2));border:none;border-radius:18px;padding:13px 22px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:opacity .2s,transform .15s;box-shadow:0 4px 16px rgba(37,99,235,.3);white-space:nowrap}
+#sBtn:hover{opacity:.88;transform:translateY(-1px)}
+
+.chips{margin-top:22px;display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:800px;animation:fU .7s .9s both}
+.chip{padding:8px 16px;border-radius:100px;border:1.5px solid var(--bdr2);background:var(--surf);font-size:12px;color:var(--mu);cursor:pointer;transition:all .2s;white-space:nowrap;font-weight:500;box-shadow:var(--sh)}
+.chip:hover{border-color:var(--b2);color:var(--b1);background:var(--surf2);box-shadow:var(--sh2);transform:translateY(-2px)}
+.caps{margin-top:22px;display:flex;gap:7px;flex-wrap:wrap;justify-content:center;animation:fU .7s 1.1s both}
+.cap{padding:4px 12px;border-radius:100px;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.12);font-size:10px;color:var(--b1);font-weight:600;font-family:'JetBrains Mono',monospace;opacity:.85}
+
+/* ── PHASE 2 QUESTIONS ── */
+#p-q{display:none;min-height:100vh;padding:60px 20px 80px;max-width:860px;margin:0 auto}
+.p-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--b2);margin-bottom:10px}
+.p-h{font-size:clamp(28px,5vw,50px);font-weight:800;letter-spacing:-2px;line-height:1.1;color:var(--txt);margin-bottom:8px}
+.p-sub{font-size:14px;color:var(--mu);margin-bottom:32px;line-height:1.6}
+.uq{background:linear-gradient(135deg,rgba(37,99,235,.07),rgba(14,165,233,.04));border:1.5px solid rgba(37,99,235,.18);border-radius:16px;padding:16px 20px;margin-bottom:28px;display:flex;gap:12px;animation:sI .4s both}
+.uq-t{font-size:15px;line-height:1.65;color:var(--txt2);font-weight:500}
+.ql{display:flex;flex-direction:column;gap:13px}
+.qc{background:var(--surf);border:1.5px solid var(--bdr);border-radius:18px;padding:20px 22px;box-shadow:var(--sh);animation:sI .4s both;transition:border-color .3s,box-shadow .3s}
+.qc:focus-within{border-color:rgba(37,99,235,.35);box-shadow:var(--sh2)}
+.qn{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--b2);margin-bottom:7px;font-weight:600}
+.qt{font-size:15px;font-weight:700;margin-bottom:13px;line-height:1.5;color:var(--txt)}
+.qi{width:100%;background:var(--bg);border:1.5px solid var(--bdr);border-radius:11px;padding:11px 15px;color:var(--txt);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;line-height:1.5;resize:vertical;min-height:46px}
+.qi:focus{border-color:rgba(37,99,235,.4);background:var(--surf)}
+.qi::placeholder{color:var(--mu2)}
+.qos{display:flex;flex-wrap:wrap;gap:7px}
+.qo{padding:8px 16px;border-radius:100px;border:1.5px solid var(--bdr);background:var(--bg);font-size:12.5px;color:var(--mu);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;transition:all .2s}
+.qo:hover,.qo.sel{border-color:var(--b1);color:var(--b1);background:rgba(37,99,235,.07)}
+.go{margin-top:28px;width:100%;padding:17px;background:linear-gradient(135deg,var(--b1),var(--b2));border:none;border-radius:16px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:#fff;box-shadow:0 6px 28px rgba(37,99,235,.30);transition:opacity .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:10px}
+.go:hover{opacity:.88;transform:translateY(-2px)}
+
+/* ── PHASE 3 ANALYZING ── */
+#p-ana{display:none;min-height:100vh;align-items:center;justify-content:center;flex-direction:column;padding:40px 20px;text-align:center}
+.ana-logo{font-size:32px;font-weight:800;letter-spacing:-1px;background:linear-gradient(135deg,var(--b1),var(--b2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:40px}
+.wl{display:flex;gap:5px;align-items:flex-end;height:44px;margin-bottom:36px}
+.wlb{width:6px;border-radius:3px;background:linear-gradient(to top,var(--b1),var(--b3));animation:wla 1.2s ease-in-out infinite}
+.wlb:nth-child(1){height:16px;animation-delay:0s}.wlb:nth-child(2){height:28px;animation-delay:.1s}.wlb:nth-child(3){height:44px;animation-delay:.2s}.wlb:nth-child(4){height:28px;animation-delay:.3s}.wlb:nth-child(5){height:16px;animation-delay:.4s}.wlb:nth-child(6){height:28px;animation-delay:.5s}.wlb:nth-child(7){height:44px;animation-delay:.6s}.wlb:nth-child(8){height:28px;animation-delay:.7s}.wlb:nth-child(9){height:16px;animation-delay:.8s}
+@keyframes wla{0%,100%{transform:scaleY(.5);opacity:.4}50%{transform:scaleY(1);opacity:1}}
+.sl{display:flex;flex-direction:column;gap:9px;width:100%;max-width:480px}
+.sr{display:flex;align-items:center;gap:13px;padding:13px 17px;border-radius:15px;background:var(--surf);border:1.5px solid var(--bdr);box-shadow:var(--sh);opacity:.3;transition:all .4s}
+.sr.act{opacity:1;border-color:rgba(37,99,235,.35);box-shadow:var(--sh2)}
+.sr.dn{opacity:.6;border-color:rgba(5,150,105,.2)}
+.si{font-size:19px;flex-shrink:0}.st{font-size:13px;font-weight:600;flex:1;text-align:left;color:var(--txt2)}.ss{font-family:'JetBrains Mono',monospace;font-size:10.5px}
+.ss-r{color:var(--b1)}.ss-ok{color:var(--grn)}
+.po{width:100%;max-width:480px;height:5px;background:var(--bdr);border-radius:100px;margin-top:20px;overflow:hidden}
+.pi{height:100%;background:linear-gradient(90deg,var(--b1),var(--b2),var(--b3));border-radius:100px;width:0%;transition:width .5s ease}
+
+/* ── PHASE 4 RESULTS ── */
+#p-res{display:none;padding:52px 20px 90px;max-width:980px;margin:0 auto}
+.rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;flex-wrap:wrap;gap:14px}
+.rt{font-size:clamp(22px,4vw,44px);font-weight:800;letter-spacing:-1.5px;color:var(--txt)}
+.nb{padding:10px 20px;border-radius:11px;border:1.5px solid var(--bdr2);background:var(--surf);color:var(--mu);font-size:13px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:all .2s;box-shadow:var(--sh)}
+.nb:hover{border-color:var(--b1);color:var(--b1);box-shadow:var(--sh2)}
+.sum{background:linear-gradient(135deg,var(--b1),var(--b2));border-radius:22px;padding:28px 30px;margin-bottom:18px;color:#fff;animation:sI .4s both;box-shadow:0 8px 36px rgba(37,99,235,.22)}
+.sum-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;opacity:.75;margin-bottom:10px}
+.sum-t{font-size:15.5px;line-height:1.8}
+.og{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.ofu{grid-column:1/-1}
+.oc{background:var(--surf);border:1.5px solid var(--bdr);border-radius:20px;padding:24px 26px;box-shadow:var(--sh);animation:sI .4s both;position:relative;overflow:hidden;transition:box-shadow .3s,transform .2s}
+.oc:hover{box-shadow:var(--sh2);transform:translateY(-2px)}
+.oc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:20px 20px 0 0}
+.ab::before{background:linear-gradient(90deg,var(--b1),var(--b2))}.ac::before{background:linear-gradient(90deg,var(--b2),var(--b3))}.ag::before{background:linear-gradient(90deg,#059669,#10b981)}.ar::before{background:linear-gradient(90deg,#dc2626,#f97316)}.ap::before{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+.oi{font-size:24px;margin-bottom:11px}.ol{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--mu2);margin-bottom:5px}.ott{font-size:18px;font-weight:800;letter-spacing:-.5px;color:var(--txt);margin-bottom:14px}
+.pi2{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--bdr)}.pi2:last-child{border-bottom:none;padding-bottom:0}.pi2:first-child{padding-top:0}
+.pb{flex-shrink:0;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700}
+.bb{background:rgba(37,99,235,.10);color:var(--b1)}.bc{background:rgba(14,165,233,.10);color:var(--b2)}.bg{background:rgba(5,150,105,.10);color:var(--grn)}.br{background:rgba(220,38,38,.10);color:var(--red)}.bpu{background:rgba(124,58,237,.10);color:#7c3aed}
+.pc{flex:1}.ptt{font-size:13.5px;font-weight:700;margin-bottom:3px;color:var(--txt);line-height:1.4}.pst{font-size:11.5px;color:var(--mu);line-height:1.5}
+.tk{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--bdr)}.tk:last-child{border-bottom:none}
+.tkt{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--b1);min-width:55px;flex-shrink:0;font-weight:600}.tkn{font-size:13px;flex:1;color:var(--txt);font-weight:500;line-height:1.4}.tkd{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--mu2);flex-shrink:0}
+.wr{display:flex;gap:11px;padding:11px 13px;border-radius:11px;background:rgba(220,38,38,.05);border:1.5px solid rgba(220,38,38,.12);margin-bottom:9px}.wr:last-child{margin-bottom:0}
+.fu{background:var(--surf);border:1.5px solid var(--bdr);border-radius:20px;padding:24px 26px;margin-top:14px;box-shadow:var(--sh)}
+.fui{width:100%;background:var(--bg);border:1.5px solid var(--bdr);border-radius:12px;padding:12px 16px;color:var(--txt);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+.fui:focus{border-color:rgba(37,99,235,.4);background:var(--surf)}.fui::placeholder{color:var(--mu2)}
+.fub{background:linear-gradient(135deg,var(--b1),var(--b2));border:none;border-radius:12px;padding:12px 20px;color:#fff;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;cursor:pointer;transition:opacity .2s,transform .15s;box-shadow:0 4px 14px rgba(37,99,235,.24);white-space:nowrap}
+.fub:hover{opacity:.88;transform:translateY(-1px)}
+.fur{display:none;margin-top:14px;padding:16px 18px;background:var(--surf2);border-radius:12px;border:1.5px solid rgba(37,99,235,.15);font-size:14px;line-height:1.75;color:var(--txt2)}
+.err{background:rgba(220,38,38,.06);border:1.5px solid rgba(220,38,38,.18);border-radius:16px;padding:24px;text-align:center;color:var(--red);font-size:14px;line-height:1.7}
+@keyframes sI{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.shim{height:3px;border-radius:100px;background:linear-gradient(90deg,transparent,var(--b2),transparent);background-size:200% 100%;animation:shi 1.5s infinite}
+@keyframes shi{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.dots::after{content:'';animation:da 1.2s infinite}
+@keyframes da{0%{content:'.'}33%{content:'..'}66%{content:'...'}100%{content:''}}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--b5);border-radius:3px}
+@media(max-width:640px){.og{grid-template-columns:1fr}.ofu{grid-column:1}}
+</style>
+</head>
+<body>
+
+<div class="wave-bg">
+  <svg class="w1" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,160 C180,260 360,60 540,160 C720,260 900,60 1080,160 C1260,260 1380,120 1440,160 L1440,0 L0,0Z" fill="url(#g1)"/>
+    <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#93c5fd"/><stop offset="100%" stop-color="#bae6fd"/></linearGradient></defs>
+  </svg>
+  <svg class="w2" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg" style="bottom:-5%">
+    <path d="M0,160 C200,60 400,260 600,160 C800,60 1000,260 1200,160 C1320,100 1400,190 1440,160 L1440,320 L0,320Z" fill="url(#g2)"/>
+    <defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#bae6fd"/><stop offset="100%" stop-color="#e0f2fe"/></linearGradient></defs>
+  </svg>
+  <svg class="w3" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,200 C240,100 480,300 720,200 C960,100 1200,300 1440,200 L1440,320 L0,320Z" fill="url(#g3)"/>
+    <defs><linearGradient id="g3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#e0f2fe"/><stop offset="100%" stop-color="#bae6fd"/></linearGradient></defs>
+  </svg>
+</div>
+
+<!-- LANGUAGE MODAL -->
+<div class="lang-modal-bg" id="langModal" onclick="closeLangModal(event)">
+  <div class="lang-modal">
+    <div class="lang-modal-head">
+      <div class="lang-modal-title">🌍 Choose Your Language</div>
+      <button class="lang-close" onclick="document.getElementById('langModal').classList.remove('open')">✕</button>
+    </div>
+    <input class="lang-search-inp" id="langSearch" placeholder="Search language..." oninput="filterLangs(this.value)">
+    <div id="langRegions"></div>
+  </div>
+</div>
+
+<div id="app">
+
+<!-- PHASE 1 -->
+<div id="p-search">
+  <div class="brand">LifeOS AGI</div>
+  <div class="brand-sub">// World's First Life Intelligence Engine</div>
+
+  <button class="lang-trigger" onclick="openLangModal()">
+    <span id="selFlag">🌐</span>
+    <span id="selLangName">Select Language</span>
+    <span style="color:var(--mu2);font-weight:400">▾</span>
+  </button>
+
+  <div class="s-wrap">
+    <textarea id="mIn" rows="2" placeholder="Type your situation in any language..."></textarea>
+    <button id="sBtn" onclick="go1()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      ANALYZE
+    </button>
+  </div>
+
+  <div class="chips" id="exChips">
+    <div class="chip" onclick="fx(this)">💰 Low salary mein business</div>
+    <div class="chip" onclick="fx(this)">😔 Life mein stuck hoon</div>
+    <div class="chip" onclick="fx(this)">📚 Career change karna hai</div>
+    <div class="chip" onclick="fx(this)">❤️ Relationship problems</div>
+    <div class="chip" onclick="fx(this)">💻 Freelancing start karna hai</div>
+    <div class="chip" onclick="fx(this)">🌍 Abroad settle karna hai</div>
+    <div class="chip" onclick="fx(this)">🏋️ Weight loss plan chahiye</div>
+    <div class="chip" onclick="fx(this)">👨‍👩‍👧 Work-life balance nahi hai</div>
+  </div>
+
+  <div class="caps">
+    <div class="cap">FINANCIAL ANALYSIS</div>
+    <div class="cap">30/90 DAY PLANS</div>
+    <div class="cap">RISK MAPPING</div>
+    <div class="cap">DAILY TASKS</div>
+    <div class="cap">BACKUP PLANS</div>
+  </div>
+</div>
+
+<!-- PHASE 2 -->
+<div id="p-q">
+  <div class="p-lbl" id="pLbl">// Step 01 — Context Collection</div>
+  <div class="p-h" id="pH">Key Questions 🤔</div>
+  <div class="p-sub" id="pSub">Answer these to get your best strategy. ~30 seconds!</div>
+  <div class="uq"><div style="font-size:21px;flex-shrink:0">💭</div><div class="uq-t" id="qd"></div></div>
+  <div class="ql" id="ql">
+    <div style="text-align:center;padding:36px;color:var(--mu)"><div class="shim" style="max-width:260px;margin:0 auto 14px"></div>Generating questions<span class="dots"></span></div>
+  </div>
+  <button class="go" id="goBtn" style="display:none;opacity:.5" onclick="go2()">⚡ Start Deep Analysis</button>
+</div>
+
+<!-- PHASE 3 -->
+<div id="p-ana" style="display:flex">
+  <div class="ana-logo">LifeOS AGI — Analyzing...</div>
+  <div class="wl"><div class="wlb"></div><div class="wlb"></div><div class="wlb"></div><div class="wlb"></div><div class="wlb"></div><div class="wlb"></div><div class="wlb"></div><div class="wlb"></div><div class="wlb"></div></div>
+  <div class="sl">
+    <div class="sr" id="s0"><div class="si">🧠</div><div class="st">Situation & Context Analysis</div><div class="ss" id="ss0">—</div></div>
+    <div class="sr" id="s1"><div class="si">💰</div><div class="st">Financial Viability Check</div><div class="ss" id="ss1">—</div></div>
+    <div class="sr" id="s2"><div class="si">🎯</div><div class="st">Personality & Risk Mapping</div><div class="ss" id="ss2">—</div></div>
+    <div class="sr" id="s3"><div class="si">📊</div><div class="st">Strategic Path Generation</div><div class="ss" id="ss3">—</div></div>
+    <div class="sr" id="s4"><div class="si">📋</div><div class="st">Action Plan Compilation</div><div class="ss" id="ss4">—</div></div>
+  </div>
+  <div class="po"><div class="pi" id="pbar"></div></div>
+</div>
+
+<!-- PHASE 4 -->
+<div id="p-res">
+  <div class="rh">
+    <div class="rt" id="rtitle">Your Life Strategy</div>
+    <button class="nb" onclick="reset()">↩ New Question</button>
+  </div>
+  <div id="rc"></div>
+</div>
+</div>
+
+<script>
+// ── STATE ──
+let S = { q:'', qs:[], ans:{}, ctx:'', lang:'English', langName:'English', langFlag:'🇬🇧' };
+
+// ── ALL WORLD LANGUAGES ──
+const LANGS = {
+  'South Asia': [
+    {flag:'🇮🇳', name:'हिंदी (Hindi)'},
+    {flag:'🇮🇳', name:'Hinglish'},
+    {flag:'🇧🇩', name:'বাংলা (Bengali)'},
+    {flag:'🇮🇳', name:'தமிழ் (Tamil)'},
+    {flag:'🇮🇳', name:'తెలుగు (Telugu)'},
+    {flag:'🇮🇳', name:'मराठी (Marathi)'},
+    {flag:'🇮🇳', name:'ગુજરાતી (Gujarati)'},
+    {flag:'🇮🇳', name:'ਪੰਜਾਬੀ (Punjabi)'},
+    {flag:'🇮🇳', name:'ಕನ್ನಡ (Kannada)'},
+    {flag:'🇮🇳', name:'മലയാളം (Malayalam)'},
+    {flag:'🇮🇳', name:'ଓଡ଼ିଆ (Odia)'},
+    {flag:'🇮🇳', name:'অসমীয়া (Assamese)'},
+    {flag:'🇵🇰', name:'اردو (Urdu)'},
+    {flag:'🇱🇰', name:'සිංහල (Sinhala)'},
+    {flag:'🇳🇵', name:'नेपाली (Nepali)'},
+  ],
+  'East Asia': [
+    {flag:'🇨🇳', name:'中文简体 (Chinese Simplified)'},
+    {flag:'🇹🇼', name:'中文繁體 (Chinese Traditional)'},
+    {flag:'🇯🇵', name:'日本語 (Japanese)'},
+    {flag:'🇰🇷', name:'한국어 (Korean)'},
+    {flag:'🇲🇳', name:'Монгол (Mongolian)'},
+    {flag:'🇹🇭', name:'ภาษาไทย (Thai)'},
+    {flag:'🇻🇳', name:'Tiếng Việt (Vietnamese)'},
+    {flag:'🇮🇩', name:'Bahasa Indonesia'},
+    {flag:'🇲🇾', name:'Bahasa Melayu (Malay)'},
+    {flag:'🇵🇭', name:'Filipino (Tagalog)'},
+    {flag:'🇰🇭', name:'ភាសាខ្មែរ (Khmer)'},
+    {flag:'🇲🇲', name:'မြန်မာဘာသာ (Burmese)'},
+    {flag:'🇱🇦', name:'ພາສາລາວ (Lao)'},
+  ],
+  'Europe': [
+    {flag:'🇬🇧', name:'English'},
+    {flag:'🇫🇷', name:'Français (French)'},
+    {flag:'🇩🇪', name:'Deutsch (German)'},
+    {flag:'🇪🇸', name:'Español (Spanish)'},
+    {flag:'🇮🇹', name:'Italiano (Italian)'},
+    {flag:'🇵🇹', name:'Português (Portuguese)'},
+    {flag:'🇷🇺', name:'Русский (Russian)'},
+    {flag:'🇺🇦', name:'Українська (Ukrainian)'},
+    {flag:'🇵🇱', name:'Polski (Polish)'},
+    {flag:'🇳🇱', name:'Nederlands (Dutch)'},
+    {flag:'🇸🇪', name:'Svenska (Swedish)'},
+    {flag:'🇳🇴', name:'Norsk (Norwegian)'},
+    {flag:'🇩🇰', name:'Dansk (Danish)'},
+    {flag:'🇫🇮', name:'Suomi (Finnish)'},
+    {flag:'🇬🇷', name:'Ελληνικά (Greek)'},
+    {flag:'🇷🇴', name:'Română (Romanian)'},
+    {flag:'🇨🇿', name:'Čeština (Czech)'},
+    {flag:'🇭🇺', name:'Magyar (Hungarian)'},
+    {flag:'🇸🇰', name:'Slovenčina (Slovak)'},
+    {flag:'🇧🇬', name:'Български (Bulgarian)'},
+    {flag:'🇭🇷', name:'Hrvatski (Croatian)'},
+    {flag:'🇷🇸', name:'Српски (Serbian)'},
+    {flag:'🇱🇹', name:'Lietuvių (Lithuanian)'},
+    {flag:'🇱🇻', name:'Latviešu (Latvian)'},
+    {flag:'🇪🇪', name:'Eesti (Estonian)'},
+    {flag:'🇦🇱', name:'Shqip (Albanian)'},
+    {flag:'🇲🇰', name:'Македонски (Macedonian)'},
+    {flag:'🇸🇮', name:'Slovenščina (Slovenian)'},
+    {flag:'🇧🇦', name:'Bosanski (Bosnian)'},
+    {flag:'🇮🇸', name:'Íslenska (Icelandic)'},
+    {flag:'🇦🇲', name:'Հայերեն (Armenian)'},
+    {flag:'🇬🇪', name:'ქართული (Georgian)'},
+    {flag:'🇦🇿', name:'Azərbaycanca (Azerbaijani)'},
+  ],
+  'Middle East & Central Asia': [
+    {flag:'🇸🇦', name:'العربية (Arabic)'},
+    {flag:'🇮🇷', name:'فارسی (Persian/Farsi)'},
+    {flag:'🇹🇷', name:'Türkçe (Turkish)'},
+    {flag:'🇮🇱', name:'עברית (Hebrew)'},
+    {flag:'🇰🇿', name:'Қазақша (Kazakh)'},
+    {flag:'🇺🇿', name:'Oʻzbek (Uzbek)'},
+    {flag:'🇹🇲', name:'Türkmen (Turkmen)'},
+    {flag:'🇰🇬', name:'Кыргызча (Kyrgyz)'},
+    {flag:'🇹🇯', name:'Тоҷикӣ (Tajik)'},
+    {flag:'🇦🇫', name:'پښتو (Pashto)'},
+    {flag:'🇰🇼', name:'Kurdish (Kurmanji)'},
+  ],
+  'Africa': [
+    {flag:'🇳🇬', name:'Hausa'},
+    {flag:'🇨🇩', name:'Swahili'},
+    {flag:'🇳🇬', name:'Yoruba'},
+    {flag:'🇳🇬', name:'Igbo'},
+    {flag:'🇿🇦', name:'Zulu'},
+    {flag:'🇿🇦', name:'Afrikaans'},
+    {flag:'🇪🇹', name:'አማርኛ (Amharic)'},
+    {flag:'🇸🇴', name:'Soomaali (Somali)'},
+    {flag:'🇿🇦', name:'Sesotho (Sotho)'},
+    {flag:'🇸🇳', name:'Wolof'},
+    {flag:'🇬🇭', name:'Twi (Akan)'},
+    {flag:'🇲🇬', name:'Malagasy'},
+  ],
+  'Americas': [
+    {flag:'🇧🇷', name:'Português Brasileiro (Brazilian Portuguese)'},
+    {flag:'🇲🇽', name:'Español Mexicano (Mexican Spanish)'},
+    {flag:'🇭🇹', name:'Kreyòl Ayisyen (Haitian Creole)'},
+    {flag:'🇸🇷', name:'Sranan Tongo'},
+    {flag:'🇵🇦', name:'Guaraní'},
+    {flag:'🇵🇪', name:'Quechua'},
+  ],
+  'Pacific & Others': [
+    {flag:'🇦🇺', name:'Australian English'},
+    {flag:'🇳🇿', name:'Māori'},
+    {flag:'🇵🇬', name:'Tok Pisin'},
+    {flag:'🇫🇯', name:'Fijian'},
+    {flag:'🌐', name:'Esperanto'},
+  ]
+};
+
+let allLangsFlat = [];
+Object.entries(LANGS).forEach(([region, langs]) => {
+  langs.forEach(l => allLangsFlat.push({...l, region}));
+});
+
+// ── BUILD LANG MODAL ──
+function buildLangModal() {
+  const c = document.getElementById('langRegions');
+  c.innerHTML = '';
+  Object.entries(LANGS).forEach(([region, langs]) => {
+    const sec = document.createElement('div');
+    sec.className = 'lang-region';
+    sec.innerHTML = `<div class="lang-region-lbl">${region}</div><div class="lang-list" id="region-${region.replace(/\s/g,'_')}"></div>`;
+    c.appendChild(sec);
+    const list = sec.querySelector('.lang-list');
+    langs.forEach(l => {
+      const b = document.createElement('button');
+      b.className = 'lang-btn' + (l.name === S.langName ? ' act' : '');
+      b.setAttribute('data-name', l.name);
+      b.setAttribute('data-flag', l.flag);
+      b.innerHTML = `<span class="lf">${l.flag}</span>${l.name}`;
+      b.onclick = () => pickLang(l.flag, l.name);
+      list.appendChild(b);
+    });
+  });
+}
+
+function filterLangs(q) {
+  const search = q.toLowerCase();
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    const name = b.getAttribute('data-name').toLowerCase();
+    b.style.display = name.includes(search) ? '' : 'none';
+  });
+  document.querySelectorAll('.lang-region').forEach(sec => {
+    const visible = [...sec.querySelectorAll('.lang-btn')].some(b => b.style.display !== 'none');
+    sec.style.display = visible ? '' : 'none';
+  });
+}
+
+function openLangModal() {
+  buildLangModal();
+  document.getElementById('langModal').classList.add('open');
+  document.getElementById('langSearch').value = '';
+  document.getElementById('langSearch').focus();
+  filterLangs('');
+}
+
+function closeLangModal(e) {
+  if(e.target === document.getElementById('langModal')) document.getElementById('langModal').classList.remove('open');
+}
+
+function pickLang(flag, name) {
+  S.lang = name; S.langName = name; S.langFlag = flag;
+  document.getElementById('selFlag').textContent = flag;
+  document.getElementById('selLangName').textContent = name;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('act', b.getAttribute('data-name') === name));
+  document.getElementById('langModal').classList.remove('open');
+}
+
+// ── PHASES ──
+function show(id) {
+  ['p-search','p-q','p-ana','p-res'].forEach(p => {
+    const el = document.getElementById(p);
+    el.style.display = (p==='p-ana') ? ((p===id)?'flex':'none') : ((p===id)?'block':'none');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── EXAMPLES ──
+const EX = [
+  ['💰 Low salary mein business', 'Meri salary sirf ₹15,000 hai, ghar ki zimmedari bhi hai. Business shuru karna chahta hoon lekin risk lene ki himmat nahi.'],
+  ['😔 Life mein stuck hoon', 'Pichle 2 saal se koi growth nahi — na career mein, na personal life mein. Bahut frustrated hoon.'],
+  ['📚 Career change karna hai', 'Main 30 saal ka hoon, 6 saal se banking mein hoon. Ab tech mein jaana chahta hoon. EMI bhi hai.'],
+  ['❤️ Relationship problems', '3 saal ki relationship mein communication khatam ho gayi. Break-up ya repair kya karun?'],
+  ['💻 Freelancing start karna hai', 'Main graphic designer hoon (4 saal ka exp). Job ke saath freelancing start karni hai. Clients kaise milenge?'],
+  ['🌍 Abroad settle karna hai', 'Canada ya Australia jaana chahta hoon. Age 26, B.Tech IT, 2 saal experience. Budget tight hai.'],
+  ['🏋️ Weight loss plan chahiye', '20 kg weight badh gaya hai. Desk job hai, exercise nahi. Doctor ne diabetes ka risk bataya.'],
+  ['👨‍👩‍👧 Work-life balance nahi hai', '12-14 ghante roz kaam karta hoon. Bacchon se time nahi, wife se arguments. Salary achhi lekin chain nahi.']
+];
+function fx(el) {
+  const found = EX.find(e => el.textContent.trim() === e[0]);
+  if(found) document.getElementById('mIn').value = found[1];
+  document.getElementById('mIn').focus();
+}
+
+// ── API ──
+async function callAI(msgs, sys, tok=1600) {
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:tok, system:sys, messages:msgs})
+  });
+  if(!r.ok) throw new Error('API '+r.status);
+  return (await r.json()).content[0].text;
+}
+
+// ── STEP 1 ──
+async function go1() {
+  if(S.langName === 'English' && !S.langFlag.includes('🇬🇧')) { /* ok */ }
+  if(!S.langName || S.langName === 'English' && document.getElementById('selLangName').textContent === 'Select Language') {
+    // remind to select language
+  }
+  const q = document.getElementById('mIn').value.trim();
+  if(!q) { document.getElementById('mIn').style.outline='2px solid rgba(220,38,38,.4)'; setTimeout(()=>document.getElementById('mIn').style.outline='',2000); return; }
+  if(document.getElementById('selLangName').textContent === 'Select Language') {
+    document.getElementById('selFlag').style.animation='bIn .3s';
+    openLangModal(); return;
+  }
+  S.q = q;
+  document.getElementById('qd').textContent = q;
+  show('p-q');
+  try {
+    const raw = await callAI(
+      [{role:'user', content:`User situation: ${q}\nSelected language: ${S.langName}\nGenerate 4 targeted clarifying questions.`}],
+      `You are LifeOS AGI. Generate 4 targeted clarifying questions for the user's situation.
+CRITICAL: Write ALL questions in ${S.langName} language only.
+Return ONLY valid JSON array, NO markdown:
+[{"id":"q1","question":"...in ${S.langName}...","type":"options","options":["A","B","C","D"],"placeholder":""},{"id":"q2","question":"...","type":"text","options":[],"placeholder":"..."}]
+Types: options or text only.`, 700);
+    S.qs = JSON.parse(raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim());
+  } catch(e) { S.qs = fbQ(); }
+  renderQ();
+}
+
+function renderQ() {
+  const l = document.getElementById('ql'); l.innerHTML = '';
+  S.qs.forEach((q,i) => {
+    const c = document.createElement('div'); c.className='qc'; c.style.animationDelay=(i*.1)+'s';
+    c.innerHTML = `<div class="qn">Q${i+1} / ${S.qs.length}</div><div class="qt">${q.question}</div>`;
+    if(q.type==='options'&&q.options.length) {
+      const od = document.createElement('div'); od.className='qos';
+      q.options.forEach(o => {
+        const b = document.createElement('button'); b.className='qo'; b.textContent=o;
+        b.onclick=()=>{od.querySelectorAll('.qo').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');S.ans[q.id]=o;chk();};
+        od.appendChild(b);
+      });
+      const ci = document.createElement('input'); ci.className='qi'; ci.style.marginTop='9px';
+      ci.placeholder = q.placeholder||'...';
+      ci.oninput=()=>{if(ci.value.trim()){od.querySelectorAll('.qo').forEach(x=>x.classList.remove('sel'));S.ans[q.id]=ci.value.trim();chk();}};
+      c.appendChild(od); c.appendChild(ci);
+    } else {
+      const t = document.createElement('textarea'); t.className='qi'; t.rows=2; t.placeholder=q.placeholder||'...';
+      t.oninput=()=>{S.ans[q.id]=t.value.trim();chk();};
+      c.appendChild(t);
+    }
+    l.appendChild(c);
+  });
+  const gb = document.getElementById('goBtn'); gb.style.display='flex'; gb.style.opacity='.5';
+}
+
+function chk() { document.getElementById('goBtn').style.opacity = Object.values(S.ans).filter(Boolean).length>=2 ? '1' : '.5'; }
+
+// ── STEP 2 ──
+async function go2() {
+  let ctx = `User Query: ${S.q}\nLanguage: ${S.langName}\n\nAnswers:\n`;
+  S.qs.forEach(q => { ctx += `- ${q.question}: ${S.ans[q.id]||'—'}\n`; });
+  S.ctx = ctx;
+  show('p-ana');
+  try {
+    const [data] = await Promise.all([genAna(), animSteps()]);
+    document.getElementById('pbar').style.width='100%';
+    await slp(150);
+    renderRes(data);
+  } catch(e) {
+    document.getElementById('rc').innerHTML=`<div class="err">⚠️ Error: ${e.message}<br><br><button class="nb" onclick="reset()" style="cursor:pointer;margin:0 auto;display:block">↩ Back</button></div>`;
+    show('p-res');
+  }
+}
+
+async function animSteps() {
+  const p=[20,40,60,80,95];
+  for(let i=0;i<5;i++){
+    document.getElementById(`s${i}`).classList.add('act');
+    document.getElementById(`ss${i}`).textContent='running';
+    document.getElementById(`ss${i}`).className='ss ss-r';
+    document.getElementById('pbar').style.width=p[i]+'%';
+    await slp(340);
+    document.getElementById(`ss${i}`).textContent='✓';
+    document.getElementById(`ss${i}`).className='ss ss-ok';
+    document.getElementById(`s${i}`).classList.remove('act');
+    document.getElementById(`s${i}`).classList.add('dn');
+  }
+}
+
+async function genAna() {
+  const raw = await callAI(
+    [{role:'user', content:S.ctx+'\n\nGenerate complete life strategy.'}],
+    `You are LifeOS AGI — the world's most advanced life strategy engine.
+CRITICAL RULE: Write EVERYTHING in ${S.langName} language. All titles, details, tasks, warnings — everything in ${S.langName}.
+SPEED MODE: Concise, max 15 words per field. No fluff.
+Return ONLY valid JSON, NO markdown:
+{"title":"5-7 word strategy title in ${S.langName}","summary":"2-3 line direct honest summary in ${S.langName}.","plan30":[{"week":"Week 1","title":"...","detail":"..."},{"week":"Week 2","title":"...","detail":"..."},{"week":"Week 3","title":"...","detail":"..."},{"week":"Week 4","title":"...","detail":"..."}],"plan90":[{"month":"Month 1","title":"...","detail":"..."},{"month":"Month 2","title":"...","detail":"..."},{"month":"Month 3","title":"...","detail":"..."}],"dailyTasks":[{"time":"6:00 AM","task":"...","duration":"20 min"},{"time":"9:00 AM","task":"...","duration":"1 hr"},{"time":"7:00 PM","task":"...","duration":"30 min"},{"time":"10:00 PM","task":"...","duration":"15 min"}],"warnings":[{"title":"...","detail":"..."},{"title":"...","detail":"..."},{"title":"...","detail":"..."}],"backupPlan":[{"title":"...","detail":"..."},{"title":"...","detail":"..."}]}`,
+    1800
+  );
+  return JSON.parse(raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim());
+}
+
+function renderRes(d) {
+  document.getElementById('rtitle').textContent = d.title||'Your Strategy';
+  const c = document.getElementById('rc'); c.innerHTML='';
+  c.innerHTML=`<div class="sum"><div class="sum-lbl">// LifeOS AGI — ${S.langFlag} ${S.langName} Analysis ✓</div><div class="sum-t">${d.summary}</div></div>`;
+  const g = document.createElement('div'); g.className='og';
+  g.appendChild(mk('ab','📅','30-Day Plan','30-DAY ROADMAP',(d.plan30||[]).map((x,i)=>`<div class="pi2"><div class="pb bb">${x.week?.replace('Week ','W')||'W'+(i+1)}</div><div class="pc"><div class="ptt">${x.title}</div><div class="pst">${x.detail}</div></div></div>`).join('')));
+  g.appendChild(mk('ac','🗓️','90-Day Vision','90-DAY VISION',(d.plan90||[]).map((x,i)=>`<div class="pi2"><div class="pb bc">M${i+1}</div><div class="pc"><div class="ptt">${x.month}: ${x.title}</div><div class="pst">${x.detail}</div></div></div>`).join('')));
+  g.appendChild(mk('ag ofu','⏰','Daily Schedule','DAILY ROUTINE',(d.dailyTasks||[]).map(t=>`<div class="tk"><div class="tkt">${t.time}</div><div class="tkn">${t.task}</div><div class="tkd">${t.duration}</div></div>`).join('')));
+  g.appendChild(mk('ar','⚠️','Warnings','RISK ALERTS',(d.warnings||[]).map(w=>`<div class="wr"><div style="font-size:17px;flex-shrink:0">🚨</div><div><div class="ptt" style="color:var(--red)">${w.title}</div><div class="pst">${w.detail}</div></div></div>`).join('')));
+  g.appendChild(mk('ap','🛡️','Backup Plan','IF PLAN A FAILS',(d.backupPlan||[]).map((b,i)=>`<div class="pi2"><div class="pb bpu">B${i+1}</div><div class="pc"><div class="ptt">${b.title}</div><div class="pst">${b.detail}</div></div></div>`).join('')));
+  c.appendChild(g);
+  c.innerHTML+=`<div class="fu"><div class="ol">// FOLLOWUP</div><div class="ott" style="margin-bottom:13px">Any more questions?</div><div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap"><input class="fui" id="fui" placeholder="Ask anything about your strategy..." style="flex:1;min-width:180px"><button class="fub" onclick="fu()">ASK →</button></div><div class="fur" id="fur"></div></div>`;
+  show('p-res');
+}
+
+function mk(cls,icon,title,lbl,inner){
+  const d=document.createElement('div');d.className='oc '+cls;
+  d.innerHTML=`<div class="oi">${icon}</div><div class="ol">${lbl}</div><div class="ott">${title}</div>${inner}`;
+  return d;
+}
+
+async function fu() {
+  const q=document.getElementById('fui').value.trim(); if(!q)return;
+  const r=document.getElementById('fur'); r.style.display='block';
+  r.innerHTML=`<div class="shim" style="margin-bottom:10px"></div>Thinking<span class="dots"></span>`;
+  try {
+    const a=await callAI([{role:'user',content:`Context:\n${S.ctx}\n\nFollowup: ${q}`}],
+      `You are LifeOS AGI. Answer the followup question concisely and practically. Write your answer in ${S.langName} language. Max 3 paragraphs.`,650);
+    r.innerHTML=a.replace(/\n\n/g,'<br><br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  } catch(e) { r.innerHTML='⚠️ Error. Try again.'; }
+  document.getElementById('fui').value='';
+}
+
+function reset() {
+  S={q:'',qs:[],ans:{},ctx:'',lang:S.lang,langName:S.langName,langFlag:S.langFlag};
+  document.getElementById('mIn').value='';
+  document.getElementById('ql').innerHTML='';
+  document.getElementById('rc').innerHTML='';
+  document.getElementById('goBtn').style.display='none';
+  for(let i=0;i<5;i++){document.getElementById(`s${i}`).className='sr';document.getElementById(`ss${i}`).textContent='—';document.getElementById(`ss${i}`).className='ss';}
+  document.getElementById('pbar').style.width='0%';
+  show('p-search');
+}
+
+function fbQ(){return[
+  {id:'q1',question:'Current financial situation?',type:'options',options:['Very tight','Some savings','Stable','Comfortable']},
+  {id:'q2',question:'How much risk can you take?',type:'options',options:['None','Low','Moderate','High']},
+  {id:'q3',question:'Daily time available?',type:'options',options:['1-2 hours','3-4 hours','Part-time','Full-time']},
+  {id:'q4',question:'Your main skill or expertise?',type:'text',options:[],placeholder:'E.g: coding, design, teaching, sales...'},
+];}
+
+function slp(ms){return new Promise(r=>setTimeout(r,ms));}
+document.getElementById('mIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();go1();}});
+</script>
+</body>
+</html>
