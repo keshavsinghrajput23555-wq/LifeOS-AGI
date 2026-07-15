@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Don\'t React Challenge</string>
+    <string name="start_game">Start Challenge</string>
+    <string name="play_again">Play Again</string>
+    <string name="ready_status">Stay serious for 10 seconds.</string>
+    <string name="camera_permission_required">Camera permission is required to play.</string>
+    <string name="camera_error">Camera error: %1$s</string>
+    <string name="challenge_dont_smile">Don\'t smile</string>
+    <string name="challenge_dont_blink">Don\'t blink</string>
+    <string name="challenge_dont_laugh">Don\'t laugh</string>
+    <string name="timer_default">Time: 10s</string>
+    <string name="timer_seconds">Time: %1$ds</string>
+    <string name="you_win">You Win</string>
+    <string name="you_lose">You Lose</string>
+    <string name="win_subtitle">Unreal focus. You did not react.</string>
+    <string name="lose_subtitle">Reaction detected. Better luck next round.</string>
+</resources>
